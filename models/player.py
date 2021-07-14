@@ -7,15 +7,18 @@ from operator import attrgetter
 class Player:
 	"""balabla"""
 	
-	def __init__(self, last_name, first_name, birth, gender, rank):
+	def __init__(self, last_name, first_name, birth, gender, ranking):
 		self.last_name = last_name
 		self.first_name = first_name
 		self.date_of_birth = birth
 		self.gender = gender
-		self.rank = rank
+		self.ranking = ranking
+		self.score = 0
 
 	def __repr__(self):
-		return repr((self.last_name, self.first_name, self.date_of_birth, self.gender, self.rank))
+		return repr((self.last_name, self.first_name, self.date_of_birth, self.gender, self.ranking))
+
+
 
 
 def main():
@@ -43,13 +46,19 @@ def main():
 		print("Player {} ".format(list_of_players.index(player) + 1))
 		print(player)
 
-	sort_list_player = sorted(list_of_players, key=attrgetter("rank"))
-	print(sort_list_player)
-	print("Round 1")
-	print("Match 1 : {} VS {}".format(sort_list_player[0].last_name, sort_list_player[4].last_name))
-	print("Match 2 : {} VS {}".format(sort_list_player[1].last_name, sort_list_player[5].last_name))
-	print("Match 3 : {} VS {}".format(sort_list_player[2].last_name, sort_list_player[6].last_name))
-	print("Match 4 : {} VS {}".format(sort_list_player[3].last_name, sort_list_player[7].last_name))
+	sort_list_player = sorted(list_of_players, key=attrgetter("ranking"))
+	#print(sort_list_player)
+	len_list_player = int(len(sort_list_player)/2)
+	list_player1 = sort_list_player[:len_list_player]
+	list_player2 = sort_list_player[len_list_player:]
+	print(list_player1)
+	print(list_player2)
+	list_matchs = zip(list_player1, list_player2)
+	for match in list_matchs:
+		print(match)
+
+
+
 
 
 if __name__ == "__main__":
