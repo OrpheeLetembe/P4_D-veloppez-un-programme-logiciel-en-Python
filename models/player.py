@@ -18,7 +18,11 @@ class Player:
 	def __repr__(self):
 		return repr((self.last_name, self.first_name, self.date_of_birth, self.gender, self.ranking))
 
+	def win(self):
+		self.score += 1
 
+	def draw(self):
+		self.score += 0
 
 
 def main():
