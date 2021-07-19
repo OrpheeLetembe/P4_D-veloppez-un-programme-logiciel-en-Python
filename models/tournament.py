@@ -5,6 +5,7 @@ from operator import attrgetter
 
 from models.player import Player
 from models.round import Round
+from models.round import Match
 
 
 class Tournament:
@@ -75,27 +76,33 @@ def main():
 	tournament.add_round(round1)
 	list_of_match_round1 = tournament.generate_first_round()
 	round1.add_match(list_of_match_round1)
-	#controller
 
-	#Vue
-	for match in list_of_match_round1:
-		print("________ {} ________".format(round1.name))
-		print("Match {}: {} {} VS {} {}".format(list_of_match_round1.index(match) + 1, match[0].last_name,
-												match[0].first_name,  match[1].last_name, match[1].first_name))
+	#print(tournament.players.index())
 
-		winner = input("Winner: ")
 
-		for player in tournament.players:
-			if winner == player.last_name + " " + player.first_name:
-				player.win()
-			elif winner == "draw":
-				player.draw()
+	for k, match in enumerate(list_of_match_round1):
+		print("Match {}: {} VS {}".format(k + 1, match[0].last_name, match[1].last_name))
 
-	print(p8.score)
-	print(p7.score)
-	print(p6.score)
-	print(p5.score)
-	print(p3.score)
+		winner = input("Winner : ")  # add control
+		player1 = ""
+		player2 = ""
+		for player in match:
+			if player.last_name == match[0].last_name:
+				player1 = player
+			elif player.last_name == match[1].last_name:
+				player2 = player
+		if winner == player1.last_name:
+			player1.win()
+			print(player1.last_name, player1.score)
+		elif winner == player1.last_name:
+			player2.win()
+			print(player2.last_name, player2.score)
+		elif winner == "draw":
+			player1.draw()
+			player2.draw()
+			print(player1.score, player2.score)
+
+
 
 if __name__ == "__main__":
 	main()
