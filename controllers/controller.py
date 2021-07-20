@@ -7,7 +7,6 @@ from models.tournament import Tournament
 from models.player import Player
 
 
-
 class Controller:
     """class to accept user data, launch new tournaments, produce match results"""
 
@@ -18,10 +17,10 @@ class Controller:
 
         self.view = view
 
-    def check_menu_entry(self, choice):
-        list_choices = [1, 2, 3, 4, 5]
+    def check_start_menu_entries(self):
+        list_choices = [1, 2, 3]
         while True:
-            choice = self.view.show_menu()
+            choice = self.view.show_start_menu(self)
             try:
                 choice = int(choice)
                 if choice in list_choices:
@@ -30,13 +29,34 @@ class Controller:
             except ValueError:
                 self.view.show_error_menu_entry(self)
 
-    def choice_menu(self):
-        """blabla"""
-        option_menu = self.check_menu_entry(self)
-        if option_menu == 1:
+    def choice_start_menu(self):
+        option_start_menu = self.check_start_menu_entries()
+        if option_start_menu == 1:
             self.add_tournament()
+        elif option_start_menu == 2:
+            print("option 2")
+        elif option_start_menu == 3:
+            print("Quit")
+
+    def check_secondary_menu_entries(self):
+        list_choices = [1, 2, 3, 4, 5]
+        while True:
+            choice = self.view.show_secondary_menu(self)
+            try:
+                choice = int(choice)
+                if choice in list_choices:
+                    return choice
+                return None
+            except ValueError:
+                self.view.show_error_menu_entry(self)
+
+    def choice_secondary_menu(self):
+        """blabla"""
+        option_secondary_menu = self.check_secondary_menu_entries()
+        if option_secondary_menu == 1:
+            #self.add_tournament()
             self.get_player()
-        elif option_menu == 2:
+        elif option_secondary_menu == 2:
             print("option 2")
         else:
             print("pas de suite")
@@ -50,7 +70,7 @@ class Controller:
         self.tournaments.append(tournament)
         print(self.tournaments)
 
-    def check_gender_entry(self, gender):
+    def check_gender_entry(self):
         while True:
             gender = self.view.prompt_player_gender(self)
             if gender == "M" or gender == "F":
@@ -58,7 +78,7 @@ class Controller:
             else:
                 self.view.show_error_gender_entry(self)
 
-    def check_ranking_entry(self, ranking):
+    def check_ranking_entry(self):
         while True:
             ranking = self.view.prompt_player_ranking(self)
             result = ranking.isdigit()
@@ -74,18 +94,19 @@ class Controller:
             last_name = self.view.prompt_player_last_name(self)
             first_name = self.view.prompt_player_first_name(self)
             birth = self.view.prompt_player_date_of_birth(self)
-            gender = self.check_gender_entry(self)
-            ranking = self.check_ranking_entry(self)
+            gender = self.check_gender_entry()
+            ranking = self.check_ranking_entry()
             player = Player(last_name, first_name, birth, gender, ranking)
             self.players.append(player)
 
-    def sort_player_ranking(self):
-        player_list_rank = sorted(self.players, key=attrgetter("ranking"))
-        print(player_list_rank)
 
     def run_tournament(self):
         """blabla"""
-        self.choice_menu()
+        self.choice_start_menu()
+        running = True
+        while running:
+           self.choice_secondary_menu()
+
 
 
 
