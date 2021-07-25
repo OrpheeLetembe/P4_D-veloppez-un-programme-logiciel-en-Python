@@ -16,56 +16,45 @@ class Controller:
 
         self.view = view
 
-    def check_start_menu_entries(self):
-        list_choices = [1, 2, 3]
-        while True:
-            choice = self.view.show_start_menu(self)
-            try:
-                choice = int(choice)
-                if choice in list_choices:
-                    return choice
-                else:
-                    self.view.show_message(self, "Please make a selection from menu")
-            except ValueError:
-                self.view.show_message(self, "Please make a selection from menu")
-
-    def choice_start_menu(self):
-        option_start_menu = self.check_start_menu_entries()
-        if option_start_menu == 1:
-            self.add_tournament()
-            #self.get_player()
-        elif option_start_menu == 2:
+    def choice_main_menu(self):
+        option_main_menu = self.view.show_main_menu(self)
+        if option_main_menu == "1":
+            tournament = self.add_tournament()
+            self.tournaments.append(tournament)
+            print(tournament.name)
+            for i in range(1, 5):
+                player = self.get_player(i)
+                tournament.add_player(player)
+            self.choice_secondary_menu(tournament)
+        elif option_main_menu == "2":
             if not self.tournaments:
                 self.view.show_message(self, "The list of tournaments is empty")
-                self.choice_start_menu()
+                self.choice_main_menu()
             else:
                 self.view.show_tournament_list(self, self.tournaments)
-        else:
+        elif option_main_menu == "3":
             self.view.show_message(self, "Goodbye")
-
-    def check_secondary_menu_entries(self):
-        list_choices = [1, 2, 3, 4, 5]
-        while True:
-            choice = self.view.show_secondary_menu(self)
-            try:
-                choice = int(choice)
-                if choice in list_choices:
-                    return choice
-                else:
-                    self.view.show_message(self, "Please make a selection from menu")
-            except ValueError:
-                self.view.show_message(self, "Please make a selection from menu")
-
-    def choice_secondary_menu(self):
-        """blabla"""
-        option_secondary_menu = self.check_secondary_menu_entries()
-        if option_secondary_menu == 1:
-            print("option 1")
-            self.add_result_match()
-        elif option_secondary_menu == 2:
-            print("option 2")
         else:
-            print("pas de suite")
+            self.view.show_message(self, "Please make a selection from menu")
+            self.choice_main_menu()
+
+    def choice_secondary_menu(self, tournament):
+        """blabla"""
+        option_secondary_menu = self.view.show_secondary_menu(self)
+        if option_secondary_menu == "1":
+            round = tournament.generate_round()
+            self.view.show_message(self, "____{}____".format(round.name))
+            self.add_result_match(round)
+        elif option_secondary_menu == "2":
+
+            print("option 2")
+        elif option_secondary_menu == "3":
+            print("option 3")
+        elif option_secondary_menu == "4":
+            print("option 4")
+        else:
+            self.view.show_message(self, "Please make a selection from menu")
+            self.choice_secondary_menu()
 
     def add_tournament(self):
         """ add tournament"""
@@ -73,13 +62,8 @@ class Controller:
         location = self.view.prompt_tournament_location(self)
         date = self.view.prompt_tournament_date(self)
         tournament = Tournament(name, location, date)
-        self.tournaments.append(tournament)
         self.view.show_players_title(self)
-        #return tournament
-
-        # for i in range(1, 4):
-        # tournament.add_player(self.get_player(i))
-        # print(tournament.list_players)
+        return tournament
 
     def check_gender_entry(self):
         while True:
@@ -98,8 +82,8 @@ class Controller:
             else:
                 self.view.show_message(self, "The player's ranking must be a positive number")
 
-    def get_player(self, i):
-        self.view.show_player_number(i)
+    def get_player(self, number_player):
+        self.view.show_player_number(number_player)
         last_name = self.view.prompt_player_last_name(self)
         first_name = self.view.prompt_player_first_name(self)
         birth = self.view.prompt_player_date_of_birth(self)
@@ -108,28 +92,44 @@ class Controller:
         player = Player(last_name, first_name, birth, gender, ranking)
         return player
 
+    # def check_result_match_entry(self, round):
+        # for match in round.list_match[0]:
+           # match = list(match)
+          #  player1 = match[0]
+          #  player2 = match[1]
+
+           # while True:
+               # winner = self.view.prompt_of_winner(self, player1.last_name, player2.last_name)
+               # winner_int = winner.isdigit()
+               # if winner_int and int(winner) in range(1, 4):
+                   # return int(winner)
+                #else:
+
     def add_result_match(self, round):
         for k, match in enumerate(round.list_match[0]):
             match = list(match)
             player1 = match[0]
             player2 = match[1]
 
-            print("Match {}: {} VS {}".format(k + 1, player1.last_name, player2.last_name))
+            self.view.show_opponent(self, k, player1.last_name, player2.last_name)
 
-            winner = int(input("Winner (Enter 1 for {} , 2 for {} or 3 for draw) : ".format(player1.last_name,
-                                                                                            player2.last_name)))  # add control
-            if winner == 1:
+            winner = self.view.prompt_of_winner(self, player1.last_name, player2.last_name)
+
+            if winner == "1":
                 player1.win()
                 player2.lose()
-            elif winner == 2:
+            elif winner == "2":
                 player2.win()
                 player1.lose()
-            elif winner == 3:
+            elif winner == "3":
                 player1.draw()
                 player2.draw()
+            else:
+                self.view.show_message(self, "Please enter 1, 2 or 3")
 
     def run_tournament(self):
-        self.choice_start_menu()
+        self.view.show_message(self, "__________ WELCOME __________")
+        self.choice_main_menu()
 
 
 
