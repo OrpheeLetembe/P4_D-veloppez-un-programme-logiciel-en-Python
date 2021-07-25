@@ -92,19 +92,6 @@ class Controller:
         player = Player(last_name, first_name, birth, gender, ranking)
         return player
 
-    # def check_result_match_entry(self, round):
-        # for match in round.list_match[0]:
-           # match = list(match)
-          #  player1 = match[0]
-          #  player2 = match[1]
-
-           # while True:
-               # winner = self.view.prompt_of_winner(self, player1.last_name, player2.last_name)
-               # winner_int = winner.isdigit()
-               # if winner_int and int(winner) in range(1, 4):
-                   # return int(winner)
-                #else:
-
     def add_result_match(self, round):
         for k, match in enumerate(round.list_match[0]):
             match = list(match)
@@ -140,35 +127,6 @@ class Controller:
 
 
 
-"""
-        i = 1
-        while i <= tournament.number_of_round:
-            print(i)
-            round = tournament.generate_round()
-            print(round.name, round.list_match)
-            for k, match in enumerate(round.list_match[0]):
-                match = list(match)
-                player1 = match[0]
-                player2 = match[1]
-
-                print("Match {}: {} VS {}".format(k + 1, player1.last_name, player2.last_name))
-
-                winner = int(input("Winner (Enter 1 for {} , 2 for {} or 3 for draw) : ".format(player1.last_name,
-                                                                                                player2.last_name)))  # add control
-                if winner == 1:
-                    player1.win()
-                    player2.lose()
-                elif winner == 2:
-                    player2.win()
-                    player1.lose()
-                elif winner == 3:
-                    player1.draw()
-                    player2.draw()
-            i += 1
-
-        #running = True
-       # while running:
-    """       #self.choice_secondary_menu()
 
 
 
