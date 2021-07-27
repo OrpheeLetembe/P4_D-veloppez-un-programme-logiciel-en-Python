@@ -6,12 +6,10 @@ from views.view import View
 
 
 def main():
-	view = View
-	game = Controller(view)
-	game.run_tournament()
+    view = View
+    game = Controller(view)
+    game.run_tournament()
 
 
 if __name__ == "__main__":
-	main()
-
-
+    main()
