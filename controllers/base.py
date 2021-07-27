@@ -35,7 +35,6 @@ class Controller:
             elif option_main_menu == "2":
                 if not self.tournaments:
                     self.view.show_message(self, "The list of tournaments is empty")
-                   # self.choice_main_menu()
                 else:
                     self.view.show_tournament_list(self, self.tournaments)
             elif option_main_menu == "3":
@@ -43,7 +42,6 @@ class Controller:
                 break
             else:
                 self.view.show_message(self, "Please make a selection from menu")
-                #self.choice_main_menu()
 
     def choice_secondary_menu(self, tournament):
         """
@@ -73,7 +71,6 @@ class Controller:
                 self.choice_main_menu()
             else:
                 self.view.show_message(self, "Please make a selection from menu")
-                #self.choice_secondary_menu()
 
     def check_pace_entry(self):
         """ bal"""
@@ -195,18 +192,3 @@ class Controller:
         """
         self.view.show_message(self, "__________ WELCOME __________")
         self.choice_main_menu()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
