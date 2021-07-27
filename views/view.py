@@ -136,13 +136,5 @@ class View:
         for k, tournament in enumerate(list_tournament):
             print(k + 1, tournament)
 
-
-
     def show_update_kanking(self, player1, player2):
         print("{}, current ranking: {}".format(player1, player2))
-
-
-
-
-
-
