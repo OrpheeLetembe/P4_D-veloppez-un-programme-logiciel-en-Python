@@ -57,6 +57,8 @@ class Tournament:
             returns the other rounds of the tournament
         get_opponent(player1, participants):
             allows to find the player 2 for each match from the second round
+        match_exists(player1, player2):
+            allows you to browse all the matches
 
         """
 
@@ -203,10 +205,6 @@ class Tournament:
     def get_opponent(self, player1, participants):
         """ This function allows to find the player 2 for each match from the second round.
 
-        it scans the list of matches from the previous rounds and determines if the first player
-        in the list of players ranked by score and by rating has already played with the second
-        player in the list.
-
         :param player1: object
         :param participants: the list of players sorted by score and ranking
         :return: player 2 of the match
@@ -215,6 +213,21 @@ class Tournament:
             if not self.match_exists(player1, participant):
                 return participant
         return participants[0]
+
+    def match_exists(self, player1, player2):
+        """ This it scans the list of matches from the previous rounds and determines
+        if the first player in the list of players ranked by score and by rating has already
+        played with the second player in the list.
+
+        :param player1:
+        :param player2:
+        :return: bool
+        """
+        for r in self.list_rounds:
+            for match in r.list_match:
+                if match == ({player1, player2}):
+                    return True
+        return False
 
     # Function to test the module
     def scoring(self, round):
@@ -239,13 +252,6 @@ class Tournament:
                 player1.draw()
                 player2.draw()
                 print(player1.score, player2.score)
-
-    def match_exists(self, player1, player2):
-        for r in self.list_rounds:
-            for match in r.list_match:
-                if match == ({player1, player2}):
-                    return True
-        return False
 
 
 def main():
