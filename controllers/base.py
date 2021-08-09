@@ -1,5 +1,8 @@
+
+
 from tinydb import TinyDB, Query
 
+from operator import attrgetter
 from typing import List
 from datetime import datetime
 
@@ -30,23 +33,20 @@ class Controller:
             if option_main_menu == "1":
                 self.generate_tournament()
             elif option_main_menu == "2":
-                tournament = self.continue_tournament()
-                self.choice_secondary_menu(tournament)
-            elif option_main_menu == "3":
                 db = self.db
                 list_tournaments = db.table("tournament").all()
                 if not list_tournaments:
                     self.view.show_message("The list of tournaments is empty")
                 else:
                     self.get_all_tournaments()
-            elif option_main_menu == "4":
+            elif option_main_menu == "3":
                 db = self.db
                 list_players = db.table("player").all()
                 if not list_players:
                     self.view.show_message("The list of players is empty")
                 else:
                     self.get_all_player()
-            elif option_main_menu == "5":
+            elif option_main_menu == "4":
                 self.view.show_message("__________ GOODBYE __________")
                 main_menu = False
             else:
@@ -234,33 +234,36 @@ class Controller:
             round.add_match_score(match_score)
             round.save_end_date()
 
-    def update_ranking(self, tournament):
+    def update_ranking(self, list_players):
         """
-        :param tournament:
+        :param list_players:
         :return:
         """
 
         self.view.show_message("______Update ranking________")
-        for player in tournament.list_players:
-            self.view.show_update_ranking(player.last_name, player.ranking)
-            self.view.show_message("New ranking")
-            player.ranking = self.check_ranking_entry()
-            self.players_table(player)
+        self.view.show_update_ranking(list_players)
 
-    def display_players(self, tournament):
+            #self.view.show_update_ranking(player.last_name, player.ranking)
+            #self.view.show_message("New ranking")
+            #player.ranking = self.check_ranking_entry()
+            #self.players_table(player)
+
+    def display_players(self, list_players):
         """
-        :param tournament:
+        :param list_players:
         :return:
         """
         view_list = self.view.prompt_user_input("1 sort by ranking, 2 sort by name or 3 update ranking")
         if view_list == "1":
-            list_players = tournament.sort_players_by_ranking()
-            self.view.show_player_ranking(list_players)
+            list_players = sorted(list_players, key=attrgetter("ranking"), reverse=True)
+            self.view.show_message("______Players sorted by ranking______")
+            self.view.show_players(list_players)
         elif view_list == "2":
-            list_players = tournament.sort_player_by_name()
-            self.view.show_player_name(list_players)
+            list_players = sorted(list_players, key=attrgetter("last_name"))
+            self.view.show_message("______Players sorted by name______")
+            self.view.show_players(list_players)
         elif view_list == "3":
-            self.update_ranking(tournament)
+            self.update_ranking(self.list_players)
         else:
             self.view.show_message("Please choose 1, 2 or 3")
 
@@ -332,14 +335,13 @@ class Controller:
         #return tournaments
 
     def get_all_player(self):
-        list_players = self.db.table("player").all()
-        for i in list_players:
+        list_player = self.db.table("player").all()
+        self.list_players.clear()
+        for i in list_player:
             player = Player.deserialize(i)
-            self.view.show_message("_____________________________________")
-            self.view.show_message("Last name: {}".format(player.last_name))
-            self.view.show_message("First name: {}".format(player.first_name))
-            self.view.show_message("Date of birth: {}".format(player.date_of_birth))
-            self.view.show_message("Ranking: {}".format(player.ranking))
+            self.list_players.append(player)
+
+        self.display_players(self.list_players)
 
     def save_all(self):
         for tournament in self.tournaments:
