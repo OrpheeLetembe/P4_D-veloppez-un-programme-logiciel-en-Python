@@ -74,9 +74,9 @@ class Controller:
                 tournament.add_comment(comment)
             elif option_secondary_menu == "4":
                 self.save_all()
-                secondary_menu = False
             elif option_secondary_menu == "5":
                 self.choice_main_menu()
+                secondary_menu = False
             else:
                 self.view.show_message("Please make a selection from menu")
 
@@ -129,7 +129,7 @@ class Controller:
         self.view.show_message("______Tournament information______")
         name = self.check_tournament_exit()
         location = self.view.prompt_user_input("Location")
-        date = self.check_date_entry("Date")
+        date = self.check_date_entry("Date (day/month/year)")
         pace = self.check_pace_entry()
         comment = self.view.prompt_user_input("Add a comment")
         tournament = Tournament(name, location, date, pace, comment)
@@ -168,7 +168,7 @@ class Controller:
         self.view.show_player_number(number_player)
         last_name = self.view.prompt_user_input("Last name")
         first_name = self.view.prompt_user_input("First name")
-        birth = self.check_date_entry("Date of birth")
+        birth = self.check_date_entry("Date of birth (day/month/year)")
         gender = self.check_gender_entry()
         ranking = self.check_ranking_entry()
         player = Player(last_name, first_name, birth, gender, ranking)
@@ -321,15 +321,27 @@ class Controller:
         """
         db = self.db
         tournaments_table = db.table("tournament").all()
-        self.view.show_tournament_list(tournaments_table)
+        self.tournaments.clear()
+        for tour in tournaments_table:
+            tournament = Tournament.deserialize(tour)
+            self.tournaments.append(tournament)
+            self.view.show_tournament_list(self.tournaments)
         while True:
             chosen_tournament = self.view.prompt_user_input("Choose a tournament")
-
             if int(chosen_tournament) > len(tournaments_table):
                 self.view.show_message("Invalid value")
             else:
-                tournament = Tournament.deserialize(tournaments_table[int(chosen_tournament) - 1])
-                print(tournament.list_rounds)
+                tournament = self.tournaments[int(chosen_tournament) - 1]
+                self.list_players.clear()
+                for i in tournament.list_players:
+                    player = Player.deserialize(i)
+                    self.list_players.append(player)
+
+                self.display_players(self.list_players)
+
+                #self.choice_secondary_menu(tournament)
+               # tournament = Tournament.deserialize(tournaments_table[int(chosen_tournament) - 1])
+                #print(tournament.list_rounds)
 
        # tournaments = self.db.table("tournament").all()
         #return tournaments
