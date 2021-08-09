@@ -86,7 +86,7 @@ class Tournament:
         self.description = comment
 
         if "list_rounds" in kwargs:
-            self.list_rounds = kwargs["list_round"]
+            self.list_rounds = kwargs["list_rounds"]
 
         if "list_players" in kwargs:
             self.list_players = kwargs["list_players"]
@@ -230,7 +230,8 @@ class Tournament:
             "rounds": [x for x in self.list_rounds]
         }
 
-    def deserialize(self, serialize_tournament):
+    @staticmethod
+    def deserialize(serialize_tournament):
 
         name = serialize_tournament["name"]
         location = serialize_tournament["location"]
@@ -242,7 +243,6 @@ class Tournament:
 
         tournament = Tournament(name, location, date, pace, comment, list_players=list_players, list_rounds=list_rounds)
         return tournament
-
 
     # Function to test the module
     def scoring(self, round):
