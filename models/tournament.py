@@ -11,7 +11,6 @@ class Tournament:
     """
         A class to represent a tournament.
         ...
-
         Attributes
         ----------
         name    : str
@@ -32,7 +31,6 @@ class Tournament:
             tournament pace
         description : str
             general remarks from the tournament
-
         Methods
         -------
         get_next_round_number():
@@ -59,10 +57,9 @@ class Tournament:
             allows to find the player 2 for each match from the second round
         match_exists(player1, player2):
             allows you to browse all the matches
-
         """
 
-    def __init__(self, name, location, date, pace, comment, number_of_round=4):
+    def __init__(self, name, location, date, pace, comment, **kwargs):
         """
         Constructs all the necessary attributes for the tournament object.
         :param name: str
@@ -81,26 +78,30 @@ class Tournament:
         self.name = name
         self.location = location
         self.date = date
-        self.number_of_round = number_of_round
+        self.number_of_round = 4
         self.list_rounds: List[Round] = []
         self.list_players: List[Player] = []
         self.number_of_players = 4
         self.time_control = pace
         self.description = comment
 
+        if "list_rounds" in kwargs:
+            self.list_rounds = kwargs["list_round"]
+
+        if "list_players" in kwargs:
+            self.list_players = kwargs["list_players"]
+
     def __repr__(self):
         return repr((self.name, self.location, self.date, self.time_control))
 
     def get_next_round_number(self):
         """ This function allows you to number the different rounds of a tournament.
-
         :return:  size of the round list + 1
         """
         return len(self.list_rounds) + 1
 
     def add_player(self, player):
         """ add a player to the list of players.
-
         :param player:
         :return: None
         """
@@ -108,7 +109,6 @@ class Tournament:
 
     def add_comment(self, comment):
         """ Add a comment in the tournament description.
-
         :param comment: str
         :return: None
         """
@@ -116,7 +116,6 @@ class Tournament:
 
     def sort_players_by_ranking(self):
         """ This function allows to sort the list of players according to their ranking.
-
         :return: list of players sorted by ranking
         """
         return sorted(self.list_players, key=attrgetter("ranking"))
@@ -124,24 +123,20 @@ class Tournament:
     def sort_players_by_score_rank(self):
         """ This function allows to sort the list of players according to their score.
         and their ranking
-
         :return: the list of players sorted by score and ranking
         """
         return sorted(self.list_players, key=attrgetter("score", "ranking"), reverse=True)
 
     def sort_player_by_name(self):
         """ This function allows to sort the list of players in alphabetical order.
-
         :return:the list of players sorted by name
         """
-        return sorted(self.list_players, key=attrgetter("name"), reverse=True)
+        return sorted(self.list_players, key=attrgetter("last_name"))
 
     def generate_round(self, round_name=None):
         """ This function allows to generate the different rounds.
-
         If the argument round_name isn't passed in, the return of the function
         get_next_round_number is used.
-
         :param round_name: str
         :return: the match list of the first round if the round_name = round 1 if not
             returns the match list of the other round
@@ -161,7 +156,6 @@ class Tournament:
     def generate_first_round(self, round_name) -> Round:
         """ This function divides the list of players sorted by ranking
         into two equal pat and matches the players according to their level.
-
         :param round_name: str
         :return:
             list of first round match
@@ -177,7 +171,6 @@ class Tournament:
 
     def add_round(self, round):
         """ this function allows to add a round to the list of rounds of the tournament.
-
         :param round: match list
         :return: None
         """
@@ -185,7 +178,6 @@ class Tournament:
 
     def generate_other_rounds(self, round_name):
         """ This function allows you to match players from other rounds.
-
         :param round_name: str
         :return: list of match of the other round
         """
@@ -204,7 +196,6 @@ class Tournament:
 
     def get_opponent(self, player1, participants):
         """ This function allows to find the player 2 for each match from the second round.
-
         :param player1: object
         :param participants: the list of players sorted by score and ranking
         :return: player 2 of the match
@@ -216,9 +207,8 @@ class Tournament:
 
     def match_exists(self, player1, player2):
         """ This it scans the list of matches from the previous rounds and determines
-        if the first player in the list of players ranked by score and by rating has already
+        if the first player in the list of players sorted by score and by rating has already
         played with the second player in the list.
-
         :param player1:
         :param player2:
         :return: bool
@@ -228,6 +218,31 @@ class Tournament:
                 if match == ({player1, player2}):
                     return True
         return False
+
+    def serialize(self):
+        return {
+            "name": self.name,
+            "location": self.location,
+            "date": self.date,
+            "pace": self.time_control,
+            "comment": self.description,
+            "players": [x.serialize() for x in self.list_players],
+            "rounds": [x for x in self.list_rounds]
+        }
+
+    def deserialize(self, serialize_tournament):
+
+        name = serialize_tournament["name"]
+        location = serialize_tournament["location"]
+        date = serialize_tournament["date"]
+        pace = serialize_tournament["pace"]
+        comment = serialize_tournament["comment"]
+        list_players = serialize_tournament["players"]
+        list_rounds = serialize_tournament["rounds"]
+
+        tournament = Tournament(name, location, date, pace, comment, list_players=list_players, list_rounds=list_rounds)
+        return tournament
+
 
     # Function to test the module
     def scoring(self, round):
