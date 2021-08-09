@@ -32,7 +32,7 @@ class Round:
         self.name = name
         self.list_match = []
         self.list_match_score = []
-        self.start_date = datetime.datetime.now()
+        self.start_date = datetime.datetime.now().strftime("%Y %m %d %H:%M:%S")
         self.end_date = ""
 
         if "list_match" in kwargs:
@@ -62,7 +62,7 @@ class Round:
         saves the date and time of the end of the round
         :return: None
         """
-        self.end_date = datetime.datetime.now()
+        self.end_date = datetime.datetime.now().strftime("%Y %m %d %H:%M:%S")
 
     def __repr__(self):
         return repr(self.name)
@@ -70,8 +70,8 @@ class Round:
     def serialize(self):
         return {
             "name": self.name,
-            "opponent": [x.serialise() for y in self.list_match for z in y for x in z],
-            "match": [x.serialise() for x in self.list_match_score],
+            "opponent": [x.serialize() for y in self.list_match for z in y for x in z],
+            "match": [x.serialize() for x in self.list_match_score],
             "start": self.start_date,
             "end": self.end_date
         }
