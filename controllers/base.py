@@ -1,4 +1,4 @@
-
+from tinydb import TinyDB, Query
 
 from typing import List
 from datetime import datetime
@@ -14,39 +14,50 @@ class Controller:
 
     def __init__(self, view):
         """init the controller"""
+        self.db = TinyDB("db.json")
         self.tournaments: List[Tournament] = []
 
         self.view = view
 
-    def choice_main_menu(self):
-        """
+        self.list_players = []
 
-        :return:
-        """
-        while True:
+    def choice_main_menu(self):
+        """ This function display the main menu"""
+        main_menu = True
+        while main_menu:
             option_main_menu = self.view.show_main_menu()
 
             if option_main_menu == "1":
                 self.generate_tournament()
             elif option_main_menu == "2":
-                if not self.tournaments:
+                tournament = self.continue_tournament()
+                self.choice_secondary_menu(tournament)
+            elif option_main_menu == "3":
+                db = self.db
+                list_tournaments = db.table("tournament").all()
+                if not list_tournaments:
                     self.view.show_message("The list of tournaments is empty")
                 else:
-                    self.view.show_tournament_list(self.tournaments)
-            elif option_main_menu == "3":
+                    self.get_all_tournaments()
+            elif option_main_menu == "4":
+                db = self.db
+                list_players = db.table("player").all()
+                if not list_players:
+                    self.view.show_message("The list of players is empty")
+                else:
+                    self.get_all_player()
+            elif option_main_menu == "5":
                 self.view.show_message("__________ GOODBYE __________")
-                break
+                main_menu = False
             else:
                 self.view.show_message("Please make a selection from menu")
 
     def choice_secondary_menu(self, tournament):
-        """
-
+        """ This function display the secondary menu
         :param tournament:
-        :return:
         """
-        running = True
-        while running:
+        secondary_menu = True
+        while secondary_menu:
             option_secondary_menu = self.view.show_secondary_menu()
 
             if option_secondary_menu == "1":
@@ -57,21 +68,23 @@ class Controller:
                     self.view.show_message("____ {} ____".format(round_match.name))
                     self.add_result_match(round_match)
             elif option_secondary_menu == "2":
-                self.update_ranking(tournament)
+                self.display_players(tournament)
             elif option_secondary_menu == "3":
-                self.display_ranking(tournament)
-            elif option_secondary_menu == "4":
-                comment = self.view.prompt_tournament_comment()
+                comment = self.view.prompt_user_input("Comment")
                 tournament.add_comment(comment)
+            elif option_secondary_menu == "4":
+                self.save_all()
+                secondary_menu = False
             elif option_secondary_menu == "5":
-                running = self.quit_tournament(tournament)
-            elif option_secondary_menu == "6":
                 self.choice_main_menu()
             else:
                 self.view.show_message("Please make a selection from menu")
 
     def check_pace_entry(self):
-        """ bal"""
+        """
+        :return:3
+        """
+
         time_control = {"1": "Bullet", "2": "Blitz", "3": "Quick hit"}
         while True:
             pace = self.view.prompt_user_input("Time control (Enter 1 for bullet, 2 for blitz or 3 for quick hit")
@@ -86,7 +99,6 @@ class Controller:
 
     def check_date_entry(self, text):
         """
-
         :return:
         """
         while True:
@@ -98,13 +110,24 @@ class Controller:
             except ValueError:
                 self.view.show_message("Please enter a date in day/month/year format")
 
+    def check_tournament_exit(self):
+        while True:
+            name = self.view.prompt_user_input("Name")
+            db = self.db
+            tournaments_table = db.table("tournament")
+            tour = Query()
+            registered_name = tournaments_table.search(tour.name == str(name))
+            if not registered_name:
+                return name
+            else:
+                self.view.show_message("This tournament already exists, choose another name")
+
     def add_tournament(self):
         """
-
         :return:
         """
         self.view.show_message("______Tournament information______")
-        name = self.view.prompt_user_input("Name")
+        name = self.check_tournament_exit()
         location = self.view.prompt_user_input("Location")
         date = self.check_date_entry("Date")
         pace = self.check_pace_entry()
@@ -115,7 +138,6 @@ class Controller:
 
     def check_gender_entry(self):
         """
-
         :return:
         """
         while True:
@@ -128,7 +150,6 @@ class Controller:
 
     def check_ranking_entry(self):
         """
-
         :return:
         """
         while True:
@@ -141,7 +162,6 @@ class Controller:
 
     def get_player(self, number_player):
         """
-
         :param number_player:
         :return:
         """
@@ -155,16 +175,25 @@ class Controller:
         return player
 
     def generate_tournament(self):
+        """
+        :return:
+        """
         tournament = self.add_tournament()
         self.tournaments.append(tournament)
-        print(tournament.description)
         self.view.show_message("________ Player registration _______")
         for i in range(1, tournament.number_of_players + 1):
             player = self.get_player(i)
             tournament.add_player(player)
+            self.players_table(player)
+
         self.choice_secondary_menu(tournament)
 
     def check_result_match_entry(self, player1, player2):
+        """
+        :param player1:
+        :param player2:
+        :return:
+        """
         while True:
             winner = self.view.prompt_of_winner(player1, player2)
             result = winner.isdigit()
@@ -179,7 +208,6 @@ class Controller:
 
     def add_result_match(self, round):
         """
-
         :param round:
         :return:
         """
@@ -201,17 +229,13 @@ class Controller:
             else:
                 player1.draw()
                 player2.draw()
-            #else:
-                #self.view.show_message("Please enter 1, 2 or 3")
 
             match_score = Match([player1.last_name, player1.score], [player2.last_name, player2.score])
-            print(match_score)
             round.add_match_score(match_score)
             round.save_end_date()
 
     def update_ranking(self, tournament):
         """
-
         :param tournament:
         :return:
         """
@@ -221,14 +245,30 @@ class Controller:
             self.view.show_update_ranking(player.last_name, player.ranking)
             self.view.show_message("New ranking")
             player.ranking = self.check_ranking_entry()
+            self.players_table(player)
 
-    def display_ranking(self, tournament):
-        list_player = tournament.sort_players_by_ranking()
-        print()
-        self.view.show_message("________ Ranking ________")
-        self.view.show_player_ranking(list_player)
+    def display_players(self, tournament):
+        """
+        :param tournament:
+        :return:
+        """
+        view_list = self.view.prompt_user_input("1 sort by ranking, 2 sort by name or 3 update ranking")
+        if view_list == "1":
+            list_players = tournament.sort_players_by_ranking()
+            self.view.show_player_ranking(list_players)
+        elif view_list == "2":
+            list_players = tournament.sort_player_by_name()
+            self.view.show_player_name(list_players)
+        elif view_list == "3":
+            self.update_ranking(tournament)
+        else:
+            self.view.show_message("Please choose 1, 2 or 3")
 
     def quit_tournament(self, tournament):
+        """
+        :param tournament:
+        :return:
+        """
         number_round = tournament.get_next_round_number()
         if number_round != tournament.number_of_round:
             result = self.view.prompt_quit_tournament()
@@ -236,10 +276,92 @@ class Controller:
         else:
             return False
 
-    def run_tournament(self):
+    def players_table(self, player: Player):
         """
-
+        :param player:
         :return:
         """
-        self.view.show_message("__________ WELCOME __________")
+        db = self.db
+        players_table = db.table("player")
+        user = Query()
+        players_table.upsert({
+            "last_name": player.last_name,
+            "first_name": player.first_name,
+            "birth": player.date_of_birth,
+            "gender": player.gender,
+            "ranking": player.ranking,
+            "score": player.score
+        }, (user.last_name == str(player.last_name)) & (user.first_name == str(player.first_name)))
+
+    def save_tournament(self, tournament: Tournament):
+        """
+        :param tournament:
+        :return:
+        """
+        db = self.db
+        tournaments_table = db.table("tournament")
+        tour = Query()
+        tournaments_table.upsert({
+            "name": tournament.name,
+            "location": tournament.location,
+            "date": tournament.date,
+            "pace": tournament.time_control,
+            "comment": tournament.description,
+            "players": [x.serialize() for x in tournament.list_players],
+            "rounds": [x.serialize() for x in tournament.list_rounds]
+
+        }, tour.name == str(tournament.name))
+
+    def get_all_tournaments(self):
+        """
+        :return:
+        """
+        db = self.db
+        tournaments_table = db.table("tournament").all()
+        self.view.show_tournament_list(tournaments_table)
+        while True:
+            chosen_tournament = self.view.prompt_user_input("Choose a tournament")
+
+            if int(chosen_tournament) > len(tournaments_table):
+                self.view.show_message("Invalid value")
+            else:
+                tournament = Tournament.deserialize(tournaments_table[int(chosen_tournament) - 1])
+                print(tournament.list_rounds)
+
+       # tournaments = self.db.table("tournament").all()
+        #return tournaments
+
+    def get_all_player(self):
+        list_players = self.db.table("player").all()
+        for i in list_players:
+            player = Player.deserialize(i)
+            self.view.show_message("_____________________________________")
+            self.view.show_message("Last name: {}".format(player.last_name))
+            self.view.show_message("First name: {}".format(player.first_name))
+            self.view.show_message("Date of birth: {}".format(player.date_of_birth))
+            self.view.show_message("Ranking: {}".format(player.ranking))
+
+    def save_all(self):
+        for tournament in self.tournaments:
+            self.save_tournament(tournament)
+
+        #self.players_table()
+
+    def continue_tournament(self):
+        db = self.db
+        tournaments_table = db.table("tournament").all()
+        self.view.show_tournament_list(tournaments_table)
+        while True:
+            selected_tour = self.view.prompt_user_input("Choose a tournament")
+            if int(selected_tour) > len(tournaments_table):
+                self.view.show_message("trop haut")
+            else:
+                tournament = tournaments_table[int(selected_tour) - 1]
+                return Tournament.deserialize(tournament)
+
+    def run_tournament(self):
+        """
+        :return:
+        """
+        self.view.show_message("__________ WELCOME TO THE CHESS TOURNAMENT PROGRAM __________")
         self.choice_main_menu()
