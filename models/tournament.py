@@ -118,7 +118,7 @@ class Tournament:
         """ This function allows to sort the list of players according to their ranking.
         :return: list of players sorted by ranking
         """
-        return sorted(self.list_players, key=attrgetter("ranking"))
+        return sorted(self.list_players, key=attrgetter("ranking"), reverse=True)
 
     def sort_players_by_score_rank(self):
         """ This function allows to sort the list of players according to their score.
