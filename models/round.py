@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 
 class Round:
@@ -32,7 +32,7 @@ class Round:
         self.name = name
         self.list_match = []
         self.list_match_score = []
-        self.start_date = datetime.datetime.now().strftime("%Y %m %d %H:%M:%S")
+        self.start_date = datetime.now().strftime("%Y %m %d %H:%M:%S")
         self.end_date = ""
 
         if "list_match" in kwargs:
@@ -62,12 +62,16 @@ class Round:
         saves the date and time of the end of the round
         :return: None
         """
-        self.end_date = datetime.datetime.now().strftime("%Y %m %d %H:%M:%S")
+        self.end_date = datetime.now().strftime("%Y %m %d %H:%M:%S")
 
     def __repr__(self):
         return repr(self.name)
 
     def serialize(self):
+        """
+
+        :return:
+        """
         return {
             "name": self.name,
             "opponent": [x.serialize() for y in self.list_match for z in y for x in z],
@@ -78,6 +82,11 @@ class Round:
 
     @classmethod
     def deserialize(cls, serialize_round: dict) -> "Round":
+        """
+
+        :param serialize_round:
+        :return:
+        """
 
         return Round(
             name=serialize_round.get("name"),
