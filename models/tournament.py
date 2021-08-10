@@ -232,7 +232,6 @@ class Tournament:
 
     @staticmethod
     def deserialize(serialize_tournament):
-
         name = serialize_tournament["name"]
         location = serialize_tournament["location"]
         date = serialize_tournament["date"]
@@ -241,7 +240,8 @@ class Tournament:
         list_players = serialize_tournament["players"]
         list_rounds = serialize_tournament["rounds"]
 
-        tournament = Tournament(name, location, date, pace, comment, list_players=list_players, list_rounds=list_rounds)
+        tournament = Tournament(name, location, date, pace, comment, list_players=list_players,
+                                list_rounds=list_rounds)
         return tournament
 
     # Function to test the module
