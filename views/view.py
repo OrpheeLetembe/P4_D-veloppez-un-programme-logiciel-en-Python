@@ -78,9 +78,28 @@ class View:
             print(k + 1, tournament.name, tournament.location, tournament.date)
 
     @staticmethod
-    def show_selected_tournament(tournament):
-        print("________Players list________")
-        print(tournament.list_players)
+    def show_selected_tournament():
+        print("________Tournament menu________")
+        print("1 Display players list")
+        print("2 Display rounds")
+        print("3 to exit")
+
+        choice = input("select a item: ")
+        if not choice:
+            return None
+        return choice
+
+    @staticmethod
+    def show_round(list_rounds):
+        print("_________________")
+        for r in list_rounds:
+            print(r.name)
+
+            for m in r.list_match_score:
+                m1 = m.get("match")
+                print("Match {} :".format(r.list_match_score.index(m) + 1))
+                print("{} {}".format(m1[0][0], m1[0][1]))
+                print("{} {}".format(m1[1][0], m1[1][1]))
 
     @staticmethod
     def show_update_ranking(list_players):
