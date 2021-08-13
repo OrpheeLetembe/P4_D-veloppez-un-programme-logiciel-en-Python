@@ -3,6 +3,7 @@
 from typing import List
 from operator import attrgetter
 
+
 from models.player import Player
 from models.round import Round
 
@@ -166,6 +167,7 @@ class Tournament:
         list_player_rank_part2 = list_player_rank[list_players_rank_divided:]
         round1 = Round(round_name)
         round1.add_match(list(zip(list_player_rank_part1, list_player_rank_part2)))
+        round1.save_start_date()
         self.add_round(round1)
         return round1
 
@@ -191,6 +193,7 @@ class Tournament:
             list_matchs.append({player1, player2})
         other_round = Round(round_name)
         other_round.add_match(list_matchs)
+        other_round.save_start_date()
         self.add_round(other_round)
         return other_round
 
@@ -220,6 +223,10 @@ class Tournament:
         return False
 
     def serialize(self):
+        """This function allows to serialize a tournament
+
+        :return: dict
+        """
         return {
             "name": self.name,
             "location": self.location,
@@ -227,22 +234,30 @@ class Tournament:
             "pace": self.time_control,
             "comment": self.description,
             "players": [x.serialize() for x in self.list_players],
-            "rounds": [x for x in self.list_rounds]
+            "rounds": [x.serialize() for x in self.list_rounds]
         }
 
-    @staticmethod
-    def deserialize(serialize_tournament):
-        name = serialize_tournament["name"]
-        location = serialize_tournament["location"]
-        date = serialize_tournament["date"]
-        pace = serialize_tournament["pace"]
-        comment = serialize_tournament["comment"]
-        list_players = serialize_tournament["players"]
-        list_rounds = serialize_tournament["rounds"]
+    @classmethod
+    def deserialize(cls, serialize_tournament: dict):
+        """This function allows the deserialization of Tournament
 
-        tournament = Tournament(name, location, date, pace, comment, list_players=list_players,
-                                list_rounds=list_rounds)
-        return tournament
+        :param serialize_tournament:
+        :return: tournament object
+        """
+
+        return Tournament(
+            name=serialize_tournament.get("name"),
+            location=serialize_tournament.get("location"),
+            date=serialize_tournament.get("date"),
+            pace=serialize_tournament.get("pace"),
+            comment=serialize_tournament.get("comment"),
+            list_players=[Player.deserialize(x) for x in serialize_tournament.get("players")],
+            list_rounds=[Round.deserialize(x) for x in serialize_tournament.get("rounds")]
+        )
+
+
+
+
 
     # Function to test the module
     def scoring(self, round):
