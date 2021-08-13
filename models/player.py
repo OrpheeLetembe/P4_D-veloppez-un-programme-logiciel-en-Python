@@ -1,3 +1,6 @@
+"""" Class Player"""
+
+
 class Player:
     """
     A class to represent a player.
@@ -70,8 +73,9 @@ class Player:
         self.score += 0
 
     def serialize(self):
-        """
-        :return:
+        """This function allows to serialize a player
+
+        :return:dict
         """
         return {
             "last_name": self.last_name,
@@ -84,9 +88,10 @@ class Player:
 
     @classmethod
     def deserialize(cls, serialized_player: dict) -> "Player":
-        """
-        :param serialized_player:
-        :return:
+        """ This function allows the deserialization of players
+
+        :param serialized_player:dict
+        :return: player object
         """
         return Player(
             last_name=serialized_player.get("last_name"),
