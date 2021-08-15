@@ -3,7 +3,6 @@
 from typing import List
 from operator import attrgetter
 
-
 from models.player import Player
 from models.round import Round
 
@@ -166,12 +165,12 @@ class Tournament:
         else:
             return self.generate_other_rounds(round_name)
 
-    def add_round(self, round):
+    def add_round(self, r):
         """ this function allows to add a round to the list of rounds of the tournament.
-        :param round: match list
+        :param r: match list
         :return: None
         """
-        self.list_rounds.append(round)
+        self.list_rounds.append(r)
 
     def generate_first_round(self, round_name) -> Round:
         """ This function divides the list of players sorted by ranking
@@ -188,6 +187,7 @@ class Tournament:
         round1.add_match(list(zip(list_player_rank_part1, list_player_rank_part2)))
         round1.save_start_date()
         self.add_round(round1)
+
         return round1
 
     def get_opponent(self, player1, participants):
@@ -197,6 +197,7 @@ class Tournament:
         :return: player 2 of the match
         """
         for participant in participants:
+
             if not self.match_exists(player1, participant):
                 return participant
         return participants[0]
@@ -270,72 +271,3 @@ class Tournament:
             list_rounds=[Round.deserialize(x) for x in serialize_tournament.get("rounds")]
 
         )
-
-    # Function to test the module
-    def scoring(self, round):
-        for k, match in enumerate(round.list_match[0]):
-            match = list(match)
-            player1 = match[0]
-            player2 = match[1]
-
-            print("Match {}: {} VS {}".format(k + 1, player1.last_name, player2.last_name))
-
-            winner = int(input("Winner (Enter 1 for {} , 2 for {} or 3 for draw) : ".format(player1.last_name,
-                                                                                            player2.last_name)))
-            if winner == 1:
-                player1.win()
-                player2.lose()
-                print(player1.last_name, player1.score)
-            elif winner == 2:
-                player2.win()
-                player1.lose()
-                print(player2.last_name, player2.score)
-            elif winner == 3:
-                player1.draw()
-                player2.draw()
-                print(player1.score, player2.score)
-
-
-def main():
-    # create tournament
-    tournament = Tournament("Tournoi 1", "Avignon", "14/01/2021")
-    # add players
-    p1 = Player("letembe", "orphee", "13/04/1980", "m", 5)
-    tournament.add_player(p1)
-    p2 = Player("davion", "alex", "11/04/1980", "f", 4)
-    tournament.add_player(p2)
-    p3 = Player("martin", "toto", "11/04/1980", "M", 2)
-    tournament.add_player(p3)
-    p4 = Player("diallo", "papa", "11/04/1990", "M", 3)
-    tournament.add_player(p4)
-    p5 = Player("Able", "coucou", "13/04/1980", "f", 6)
-    tournament.add_player(p5)
-    p6 = Player("jacob", "jean", "11/04/1980", "m", 8)
-    tournament.add_player(p6)
-    p7 = Player("mamama", "andy", "11/04/1980", "M", 7)
-    tournament.add_player(p7)
-    p8 = Player("salif", "henry", "11/04/1990", "M", 1)
-    tournament.add_player(p8)
-
-    # Round 1
-    round = tournament.generate_round()
-    print(round.name, round.list_match)
-    tournament.scoring(round)
-
-    # Round 2
-    round = tournament.generate_round()
-    print(round.name, round.list_match)
-    tournament.scoring(round)
-
-    # Round 3
-    round = tournament.generate_round()
-    print(round.name, round.list_match)
-    tournament.scoring(round)
-    # Round 4
-    round = tournament.generate_round()
-    print(round.name, round.list_match)
-    tournament.scoring(round)
-
-
-if __name__ == "__main__":
-    main()
