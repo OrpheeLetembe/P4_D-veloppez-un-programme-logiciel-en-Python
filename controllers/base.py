@@ -8,7 +8,7 @@ from datetime import datetime
 
 from models.tournament import Tournament
 from models.player import Player
-from models.round import Round, Match
+from models.round import Match
 
 
 class Controller:
@@ -16,6 +16,7 @@ class Controller:
 
     def __init__(self, view):
         """init the controller"""
+
         self.db = TinyDB("db.json")
         self.tournaments: List[Tournament] = []
 
@@ -46,14 +47,15 @@ class Controller:
                 else:
                     self.get_all_player()
             elif option_main_menu == "4":
-                self.view.show_message("__________ GOODBYE __________")
+                self.view.show_message("THANK YOU FOR USING THE CHESS PROGRAM, GOODBYE")
                 main_menu = False
+
             else:
                 self.view.show_message("Please make a selection from menu")
 
     def choice_secondary_menu(self, tournament):
         """ This function display the secondary menu
-        :param tournament:
+        :param tournament: Tournament object
         """
         secondary_menu = True
         while secondary_menu:
@@ -69,12 +71,14 @@ class Controller:
                     self.add_result_match(round_match)
 
             elif option_secondary_menu == "2":
+                self.update_ranking(tournament.list_players)
+            elif option_secondary_menu == "3":
                 comment = self.view.prompt_user_input("Comment")
                 tournament.add_comment(comment)
-            elif option_secondary_menu == "3":
-                self.choice_main_menu()
             elif option_secondary_menu == "4":
                 self.save_all()
+            elif option_secondary_menu == "5":
+                self.choice_main_menu()
                 secondary_menu = False
             else:
                 self.view.show_message("Please make a selection from menu")
@@ -107,7 +111,7 @@ class Controller:
                 if date_time:
                     return date
             except ValueError:
-                self.view.show_message("Please enter a date in day/month/year format")
+                self.view.show_message("Please enter a date in day/month/year format (example 4/10/2000)")
 
     def check_tournament_exit(self):
         """
@@ -136,6 +140,7 @@ class Controller:
         pace = self.check_pace_entry()
         comment = self.view.prompt_user_input("Add a comment")
         tournament = Tournament(name, location, date, pace, comment)
+        tournament.add_date(date)
 
         return tournament
 
@@ -149,7 +154,7 @@ class Controller:
             if capitalize_gender == "M" or capitalize_gender == "F":
                 return capitalize_gender
             else:
-                self.view.show_message("the gender of the player must be M or F")
+                self.view.show_message("The gender of the player must be M or F")
 
     def check_id_player(self):
         while True:
@@ -235,6 +240,10 @@ class Controller:
             else:
                 self.view.show_message("Please select from the list")
 
+    def change_date(self, tournament):
+        date = self.check_date_entry("Date (day/month/year)")
+        tournament.list_date.append(date)
+
     def generate_tournament(self):
         """
         :return:
@@ -252,7 +261,6 @@ class Controller:
         else:
             self.old_or_new_players(tournament)
 
-        self.save_all()
         self.choice_secondary_menu(tournament)
 
     def check_result_match_entry(self, player1, player2):
@@ -285,12 +293,12 @@ class Controller:
             else:
                 self.view.show_message("The tournament's ID must be a positive number")
 
-    def add_result_match(self, round):
+    def add_result_match(self, r):
         """
-        :param round:
+        :param r: Round object
         :return:
         """
-        for k, match in enumerate(round.list_match[0]):
+        for k, match in enumerate(r.list_match[0]):
             match = list(match)
             player1 = match[0]
             player2 = match[1]
@@ -310,8 +318,8 @@ class Controller:
                 player2.draw()
 
             match_score = Match(k, player1, player1.score, player2, player2.score)
-            round.add_match_score(match_score)
-            round.save_end_date()
+            r.add_match_score(match_score)
+            r.save_end_date()
             self.save_all()
 
     def update_ranking(self, list_players):
@@ -359,19 +367,6 @@ class Controller:
             else:
                 self.view.show_message("Please choose 1, 2 or 3")
 
-    def quit_tournament(self, tournament):
-        """
-        :param tournament:
-        :return:
-        """
-        number_round = tournament.get_next_round_number()
-        if number_round != tournament.number_of_round:
-            result = self.view.prompt_quit_tournament()
-            if result:
-                return False
-        else:
-            return False
-
     def players_table(self, player: Player):
         """
         :param player:
@@ -401,6 +396,7 @@ class Controller:
             "name": tournament.name,
             "location": tournament.location,
             "date": tournament.date,
+            "list_date": tournament.list_date,
             "pace": tournament.time_control,
             "comment": tournament.description,
             "players": [x.serialize() for x in tournament.list_players],
@@ -429,13 +425,19 @@ class Controller:
                     self.display_players_list(tournament.list_players)
                 elif choice == "2":
                     self.view.show_round(tournament.list_rounds)
+                    for r in tournament.list_rounds:
+                        print(r.start_date)
                 elif choice == "3":
                     tournament_items = False
                 elif choice == "4":
-                    self.update_ranking(tournament.list_players)
-                elif choice == "5":
-                    #self.continue_tournament(tournament)
-                    self.choice_secondary_menu(tournament)
+                    now = datetime.now().strftime("%d/%m/%Y")
+                    current_date = datetime.strptime(now, "%d/%m/%Y")
+                    first_date_tournament = datetime.strptime(tournament.list_date[0], "%d/%m/%Y")
+                    if first_date_tournament == current_date:
+                        self.choice_secondary_menu(tournament)
+                    else:
+                        self.change_date(tournament)
+                        self.choice_secondary_menu(tournament)
                 else:
                     self.view.show_message("Please choose 1, 2 or 3")
 
@@ -445,7 +447,6 @@ class Controller:
         :return:
         """
         list_player = self.db.table("player").all()
-        #self.list_players.clear()
         self.list_players = [Player.deserialize(x) for x in list_player]
 
         self.display_players_list(self.list_players)
@@ -458,92 +459,6 @@ class Controller:
         for tournament in self.tournaments:
             self.save_tournament(tournament)
 
-        # self.players_table()
-
-    def continue_tournament(self, tournament):
-        list_opponent = []
-        list_matchs = []
-        for p in tournament.list_players:
-            player = Player.deserialize(p)
-            list_opponent.append(player)
-        list_players = list_opponent
-        list_opponent = []
-        #list_round = [Round.deserialize(x) for x in tournament.list_rounds]
-        #print(list_round)
-        for r in tournament.list_rounds:
-            round = Round.deserialize(r)
-            for p in round.list_match:
-                player_d = Player.deserialize(p)
-                list_opponent.append(player_d)
-            while list_opponent:
-                player1 = list_opponent[0]
-                player2 = list_opponent[1]
-                list_matchs.append({player1, player2})
-                round.list_match = list_matchs
-                list_opponent.remove(player1)
-                list_opponent.remove(player2)
-                round = Round(round.name, list_match=list_players, list_match_score=round.list_match_score,
-                              start_date=round.start_date, end_date=round.end_date)
-            print(round.list_match)
-            tournament.add_round(round)
-            print(tournament.list_rounds)
-
-            #tournament.add_round(round.name)= list_matchs
-            #print(tournament.list_rounds[0])
-
-
-
-
-           
-
-        """   
-           
-            tournament.add_round(round)
-            print(tournament.list_rounds)
-        #return tournament
-
-        #print(list_opponent)
-        #print(list_matchs)
-
-            # for m in r.list_match_score:
-            # print(m.get("opponent"))
-            # m1 = Match.deserialize(m)
-            # print(m1.name)
-                # p1 = m1.player1[0]
-                # print(type(p1))
-                # print(r.list_match_score)
-
-
-
-
-
-
-                #player1 = Player.deserialize(m[0][0])
-                #print(player1)
-               # print(m[0][0], m[1][0])
-
-
-
-
-
-
-
-
-
-
-
-            #op = r.get("match")
-            #print(op[0])
-
-
-
-        #deserialize = [r.deserialize(x)for x in tournament.list_rounds]
-
-        #print(deserialize)
-
-
-        #return Tournament.deserialize(tournament)
-"""
     def run_tournament(self):
         """
         :return:
