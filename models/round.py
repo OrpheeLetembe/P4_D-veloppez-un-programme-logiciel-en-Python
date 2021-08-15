@@ -45,7 +45,7 @@ class Round:
         if "list_match_score" in kwargs:
             self.list_match_score = kwargs["list_match_score"]
 
-        if "star_date" in kwargs:
+        if "start_date" in kwargs:
             self.start_date = kwargs["start_date"]
 
         if "end_date" in kwargs:
@@ -66,14 +66,14 @@ class Round:
 
         :return:
         """
-        self.start_date = datetime.now().strftime("%Y %m %d %H:%M:%S")
+        self.start_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     def save_end_date(self):
         """
         saves the date and time of the end of the round
         :return: None
         """
-        self.end_date = datetime.now().strftime("%Y %m %d %H:%M:%S")
+        self.end_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     def __repr__(self):
         return repr(self.name)
@@ -83,9 +83,11 @@ class Round:
 
         :return:dict
         """
+
+        list_opponent = [x.serialize() for y in self.list_match for z in y for x in z]
         return {
             "name": self.name,
-            "opponent": [x.serialize() for y in self.list_match for z in y for x in z], #for x in z],
+            "opponent": list_opponent,
             "match": [x.serialize() for x in self.list_match_score],
             "start": self.start_date,
             "end": self.end_date
@@ -98,11 +100,22 @@ class Round:
         :param serialize_round:
         :return:round object
         """
+        list_opponent = []
+        deserialize_opponent = [Player.deserialize(x) for x in serialize_round.get("opponent")]
+        while deserialize_opponent:
+
+            p1 = deserialize_opponent[0]
+            p2 = deserialize_opponent[1]
+            opponent = [(p1, p2)]
+            list_opponent.append(opponent)
+
+            deserialize_opponent.remove(p1)
+            deserialize_opponent.remove(p2)
 
         return Round(
 
             name=serialize_round.get("name"),
-            list_match=[Player.deserialize(x) for x in serialize_round.get("opponent")],
+            list_match=list_opponent,
             list_match_score=[Match.deserialize(x) for x in serialize_round.get("match")],
             start_date=serialize_round.get("start"),
             end_date=serialize_round.get("end")
