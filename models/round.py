@@ -1,4 +1,8 @@
+
+""" Class round and class match"""
+
 from datetime import datetime
+
 from models.player import Player
 
 
@@ -52,27 +56,19 @@ class Round:
             self.end_date = kwargs["end_date"]
 
     def add_match(self, match):
-        """
-        :param match:
-
-        """
+        """ Adds opponents to the list of matchs."""
         self.list_match.append(match)
 
     def add_match_score(self, match):
+        """ Add result of match to the list of matchs."""
         self.list_match_score.append(match)
 
     def save_start_date(self):
-        """
-
-        :return:
-        """
+        """ Saves the date and time of the start of the round """
         self.start_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     def save_end_date(self):
-        """
-        saves the date and time of the end of the round
-        :return: None
-        """
+        """ Saves the date and time of the end of the round """
         self.end_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     def __repr__(self):
@@ -128,11 +124,21 @@ class Match:
     A class to represent a match.
     Attributes
     ----------
-    list1 : list
+    name : str
+        match name
+    player1 : object
+        object player 1
+    player2 : object
+        object player 2
+    score1 : int
+        score player 1
+    score2 : int
+        score player 2
+
     """
 
     def __init__(self, name, player1, score1, player2, score2):
-        """
+        """ Constructs all the necessary attributes for the match object
 
         :param name:
         :param player1:
