@@ -19,42 +19,55 @@ class Controller:
 
         self.db = TinyDB("db.json")
         self.tournaments: List[Tournament] = []
+        self.list_players = []
 
         self.view = view
 
-        self.list_players = []
-
     def choice_main_menu(self):
-        """ This function display the main menu"""
+        """ This function display the main menu.
+        it allows the creation of a new tournament, the display of the list of tournaments
+        and the display of the list of all players
+
+        """
         main_menu = True
         while main_menu:
             option_main_menu = self.view.show_main_menu()
 
             if option_main_menu == "1":
                 self.generate_tournament()
+                main_menu = False
             elif option_main_menu == "2":
                 db = self.db
                 list_tournaments = db.table("tournament").all()
+
                 if not list_tournaments:
                     self.view.show_message("The list of tournaments is empty")
                 else:
                     self.get_all_tournaments()
+                    main_menu = False
+
             elif option_main_menu == "3":
                 db = self.db
                 list_players = db.table("player").all()
+
                 if not list_players:
                     self.view.show_message("The list of players is empty")
                 else:
                     self.get_all_player()
+                    main_menu = False
+
             elif option_main_menu == "4":
-                self.view.show_message("THANK YOU FOR USING THE CHESS PROGRAM, GOODBYE")
+                self.view.show_message("__________ THANK YOU FOR USING THE CHESS PROGRAM, GOODBYE __________")
                 main_menu = False
 
             else:
                 self.view.show_message("Please make a selection from menu")
 
     def choice_secondary_menu(self, tournament):
-        """ This function display the secondary menu
+        """ This function display the secondary menu.
+        it allows you to add the results of the matches, update the players' ranking,
+        add comments and save the tournament.
+
         :param tournament: Tournament object
         """
         secondary_menu = True
@@ -83,14 +96,51 @@ class Controller:
             else:
                 self.view.show_message("Please make a selection from menu")
 
-    def check_pace_entry(self):
-        """
-        :return:3
-        """
+    def check_tournament_exit(self):
+        """This function checks if the name of the tournament entered by the user
+        is not already present in the list of registered tournaments.
 
+        :return:str
+            tournament name
+        """
+        while True:
+            name = self.view.prompt_user_input("Name")
+            db = self.db
+            tournaments_table = db.table("tournament")
+            tour = Query()
+            registered_name = tournaments_table.search(tour.name == str(name))
+
+            if not registered_name:
+                return name
+            else:
+                self.view.show_message("This tournament already exists, choose another name")
+
+    def check_date_entry(self, text):
+        """ This function checks that the date entered by the user is in day/month/year format.
+        :return: str
+           date entered by user
+        """
+        while True:
+            date = self.view.prompt_user_input(text)
+            try:
+                date_time = datetime.strptime(date, '%d/%m/%Y')
+
+                if date_time:
+                    return date
+            except ValueError:
+                self.view.show_message("Please enter a date in day/month/year format (example 4/10/2000)")
+
+    def check_pace_entry(self):
+        """This function checks if the user's input complies with the different
+        time management types of a tournament.
+        :return:str
+            Type of time management chosen by the user
+
+        """
         time_control = {"1": "Bullet", "2": "Blitz", "3": "Quick hit"}
         while True:
             pace = self.view.prompt_user_input("Time control (Enter 1 for bullet, 2 for blitz or 3 for quick hit")
+
             if pace == "1":
                 return time_control["1"]
             elif pace == "2":
@@ -100,43 +150,14 @@ class Controller:
             else:
                 self.view.show_message(" {} is not part of the choice list".format(pace))
 
-    def check_date_entry(self, text):
-        """
-        :return:
-        """
-        while True:
-            date = self.view.prompt_user_input(text)
-            try:
-                date_time = datetime.strptime(date, '%d/%m/%Y')
-                if date_time:
-                    return date
-            except ValueError:
-                self.view.show_message("Please enter a date in day/month/year format (example 4/10/2000)")
-
-    def check_tournament_exit(self):
-        """
-
-        :return:
-        """
-        while True:
-            name = self.view.prompt_user_input("Name")
-            db = self.db
-            tournaments_table = db.table("tournament")
-            tour = Query()
-            registered_name = tournaments_table.search(tour.name == str(name))
-            if not registered_name:
-                return name
-            else:
-                self.view.show_message("This tournament already exists, choose another name")
-
     def add_tournament(self):
-        """
-        :return:
+        """ The purpose of this function is to create a new tournament
+        :return:tournament object
         """
         self.view.show_message("______Tournament information______")
         name = self.check_tournament_exit()
         location = self.view.prompt_user_input("Location")
-        date = self.check_date_entry("Date (day/month/year)")
+        date = datetime.now().strftime("%d/%m/%Y")
         pace = self.check_pace_entry()
         comment = self.view.prompt_user_input("Add a comment")
         tournament = Tournament(name, location, date, pace, comment)
@@ -145,42 +166,65 @@ class Controller:
         return tournament
 
     def check_gender_entry(self):
-        """
-        :return:
+        """ This function checks that the user's entered gender is m or f.
+        :return:str
+             Player's gender
         """
         while True:
             gender = self.view.prompt_user_input("Gender")
-            capitalize_gender = gender.capitalize()
-            if capitalize_gender == "M" or capitalize_gender == "F":
-                return capitalize_gender
+            list_gender = ["m", "f"]
+
+            if gender in list_gender:
+                return gender.capitalize()
             else:
                 self.view.show_message("The gender of the player must be M or F")
 
-    def check_id_player(self):
-        while True:
-            player_id = self.view.prompt_user_input("Select a player ID ")
-            result = player_id.isdigit()
-            if result:
-                return int(player_id)
-            else:
-                self.view.show_message("The player's ID must be a positive number")
-
     def check_ranking_entry(self):
-        """
-        :return:
+        """ This function checks that the ranking entered by the user is a number
+
+        :return:int
+            player's ranking
         """
         while True:
             ranking = self.view.prompt_user_input("Ranking")
             result = ranking.isdigit()
+
             if result:
                 return int(ranking)
             else:
                 self.view.show_message("The player's ranking must be a positive number")
 
-    def get_player(self, number_player):
+    def check_id_player(self):
+        """ This function checks that the ID entered by the user is a number.
+
+        :return: int
+            player's ID
         """
-        :param number_player:
-        :return:
+        while True:
+            player_id = self.view.prompt_user_input("Select a player ID ")
+            result = player_id.isdigit()
+
+            if result:
+                return int(player_id)
+            else:
+                self.view.show_message("The player's ID must be a positive number")
+
+    def add_new_players(self, tournament, number):
+        """ This function allows to add a new player to the tournament and the list of players
+
+        :param tournament: tournament object
+        :param number:int
+
+        """
+        player = self.get_player(number)
+        tournament.add_player(player)
+        self.players_table(player)
+
+    def get_player(self, number_player):
+        """ This function allows the creation of a new player.
+
+        :param number_player: int
+        :return:player object
         """
         self.view.show_player_number(number_player)
         last_name = self.view.prompt_user_input("Last name")
@@ -189,26 +233,15 @@ class Controller:
         gender = self.check_gender_entry()
         ranking = self.check_ranking_entry()
         player = Player(last_name, first_name, birth, gender, ranking)
+
         return player
 
-    def add_new_players(self, tournament, number):
-        """
-
-        :param tournament:
-        :param number:
-        :return:
-        """
-        player = self.get_player(number)
-        tournament.add_player(player)
-        self.players_table(player)
-
     def add_player_from_list_players(self, tournament):
-        """
+        """ This function allows to add a player from the list of players to the tournament
 
-        :param tournament:
-        :return:
-        """
+        :param tournament: tournament objet
 
+        """
         db = self.db
         list_players = db.table("player").all()
         list_players_deserialize = [Player.deserialize(x) for x in list_players]
@@ -223,14 +256,14 @@ class Controller:
         self.view.show_message(" Number of registered players :{}".format(len(tournament.list_players)))
 
     def old_or_new_players(self, tournament):
-        """
+        """ This function allows the user to choose between adding a player from the list and adding a new player.
 
-        :param tournament:
-        :return:
+        :param tournament: tournament object
         """
         number_registered_players = 1
         while number_registered_players < tournament.number_of_players + 1:
             choice = self.view.prompt_user_input("1 add from the list of players  2 add a new player")
+
             if choice == "1":
                 self.add_player_from_list_players(tournament)
                 number_registered_players += 1
@@ -240,14 +273,8 @@ class Controller:
             else:
                 self.view.show_message("Please select from the list")
 
-    def change_date(self, tournament):
-        date = self.check_date_entry("Date (day/month/year)")
-        tournament.list_date.append(date)
-
     def generate_tournament(self):
-        """
-        :return:
-        """
+        """ This function allows to generate a tournament."""
         tournament = self.add_tournament()
         self.tournaments.append(tournament)
         self.view.show_message("________ Player registration _______")
@@ -264,10 +291,12 @@ class Controller:
         self.choice_secondary_menu(tournament)
 
     def check_result_match_entry(self, player1, player2):
-        """
-        :param player1:
-        :param player2:
-        :return:
+        """ This function checks that the result entered by the user is a number between 1 and 3.
+
+        :param player1: object
+        :param player2: objet
+        :return:int
+            user's choice
         """
         while True:
             winner = self.view.prompt_of_winner(player1, player2)
@@ -283,20 +312,11 @@ class Controller:
             else:
                 self.view.show_message("Please enter a number between 1 and 3")
 
-    def check_id_tournament(self, list_tournament):
-        while True:
-            tournament_id = self.view.show_tournament_list(list_tournament)
-            result = tournament_id.isdigit()
-
-            if result:
-                return int(tournament_id)
-            else:
-                self.view.show_message("The tournament's ID must be a positive number")
-
     def add_result_match(self, r):
-        """
+        """ This function is used to assign points to players and to create a match instance.
+
         :param r: Round object
-        :return:
+
         """
         for k, match in enumerate(r.list_match[0]):
             match = list(match)
@@ -322,55 +342,27 @@ class Controller:
             r.save_end_date()
             self.save_all()
 
-    def update_ranking(self, list_players):
-        """
-        :param list_players:
-        :return:
-        """
-        self.view.show_message("______Update ranking________")
-        for player in list_players:
-            self.view.show_message("{} {} {}".format(list_players.index(player) + 1, player.last_name,
-                                                     player.first_name))
+    def check_id_tournament(self, list_tournament):
+        """ This function checks that the ID entered by the user is a number
 
-        player_id = self.check_id_player()
-
-        if player_id < len(list_players):
-            player = list_players[int(player_id) - 1]
-            print("{} {} current ranking: {}".format(player.last_name, player.first_name, player.ranking))
-            new_ranking = self.check_ranking_entry()
-            player.ranking = new_ranking
-            print("{} {} current ranking: {}".format(player.last_name, player.first_name, player.ranking))
-            self.players_table(player)
-        else:
-            self.view.show_message("Please select from the list")
-
-    def display_players_list(self, list_players):
+        :param list_tournament: list
+        :return: int
+            tournament ID
         """
-        :param list_players:
-        :return:
-        """
-        display_player = True
-        while display_player:
-            view_list = self.view.prompt_user_input(" Enter 1 to sort by ranking, 2 to sort by name or 3 to exit")
-            if view_list == "1":
-                list_players = sorted(list_players, key=attrgetter("ranking"), reverse=True)
-                self.view.show_message("______Players sorted by ranking______")
-                for player in list_players:
-                    self.view.show_players_list(player)
-            elif view_list == "2":
-                list_players = sorted(list_players, key=attrgetter("last_name"))
-                self.view.show_message("______Players sorted by name______")
-                for player in list_players:
-                    self.view.show_players_list(player)
-            elif view_list == "3":
-                display_player = False
+        while True:
+            tournament_id = self.view.show_tournament_list(list_tournament)
+            result = tournament_id.isdigit()
+
+            if result:
+                return int(tournament_id)
             else:
-                self.view.show_message("Please choose 1, 2 or 3")
+                self.view.show_message("The tournament's ID must be a positive number")
 
     def players_table(self, player: Player):
-        """
-        :param player:
-        :return:
+        """ This function is used to register players and to update the players' table.
+
+        :param player: object
+
         """
         db = self.db
         players_table = db.table("player")
@@ -384,10 +376,61 @@ class Controller:
             "score": player.score
         }, (user.last_name == str(player.last_name)) & (user.first_name == str(player.first_name)))
 
-    def save_tournament(self, tournament: Tournament):
+    def update_ranking(self, list_players):
+        """ This function is used to update the players' ranking.
+
+        :param list_players: list
+
         """
-        :param tournament:
-        :return:
+        self.view.show_message("______Update ranking________")
+        for player in list_players:
+            self.view.show_message("{} {} {}".format(list_players.index(player) + 1, player.last_name,
+                                                     player.first_name))
+
+        player_id = self.check_id_player()
+
+        if player_id < len(list_players):
+            player = list_players[int(player_id) - 1]
+            self.view.show_message("{} {} current ranking: {}".format(player.last_name, player.first_name,
+                                                                      player.ranking))
+            new_ranking = self.check_ranking_entry()
+            player.ranking = new_ranking
+
+            self.players_table(player)
+        else:
+            self.view.show_message("Please select from the list")
+
+    def display_players_list(self, list_players):
+        """ This function is used to display all the players in alphabetical order or by ranking.
+
+        :param list_players: list
+
+        """
+        display_player = True
+        while display_player:
+            view_list = self.view.prompt_user_input(" Enter 1 to sort by ranking, 2 to sort by name or 3 to exit")
+
+            if view_list == "1":
+                list_players = sorted(list_players, key=attrgetter("ranking"), reverse=True)
+                self.view.show_message("______Players sorted by ranking______")
+                for player in list_players:
+                    self.view.show_players_list(player)
+            elif view_list == "2":
+                list_players = sorted(list_players, key=attrgetter("last_name"))
+                self.view.show_message("______Players sorted by name______")
+                for player in list_players:
+                    self.view.show_players_list(player)
+            elif view_list == "3":
+                display_player = False
+                self.choice_main_menu()
+            else:
+                self.view.show_message("Please choose 1, 2 or 3")
+
+    def save_tournament(self, tournament: Tournament):
+        """ This function is used to register tournaments and to update the tournaments table.
+
+        :param tournament:object
+
         """
         db = self.db
         tournaments_table = db.table("tournament")
@@ -404,9 +447,33 @@ class Controller:
 
         }, tour.name == str(tournament.name))
 
-    def get_all_tournaments(self):
+    @staticmethod
+    def next_date(tournament):
+        """ This function is used to compare the current date with the date recorded when the tournament was created.
+
+        :param tournament: object
+        :return: bool
         """
-        :return:
+        now = datetime.now().strftime("%d/%m/%Y")
+        str_now = datetime.strptime(str(now), "%d/%m/%Y")
+        first_date_tournament = datetime.strptime(tournament.list_date[0], "%d/%m/%Y")
+
+        return str_now == first_date_tournament
+
+    @staticmethod
+    def change_date(tournament):
+        """ This function is used for updating the list of tournament dates.
+
+        :param tournament: object
+
+        """
+        date = datetime.now().strftime("%d/%m/%Y")
+        tournament.list_date.append(date)
+
+    def get_all_tournaments(self):
+        """ This function is used to display the tournament menu.
+            it allows to access to the list of players, to the update of the rankings and to the list of rounds
+
         """
         db = self.db
         tournaments_table = db.table("tournament").all()
@@ -421,28 +488,29 @@ class Controller:
             tournament_items = True
             while tournament_items:
                 choice = self.view.show_selected_tournament(tournament)
+
                 if choice == "1":
                     self.display_players_list(tournament.list_players)
+                    tournament_items = False
                 elif choice == "2":
                     self.view.show_round(tournament.list_rounds)
-                    for r in tournament.list_rounds:
-                        print(r.start_date)
                 elif choice == "3":
                     tournament_items = False
+                    self.choice_main_menu()
                 elif choice == "4":
-                    now = datetime.now().strftime("%d/%m/%Y")
-                    current_date = datetime.strptime(now, "%d/%m/%Y")
-                    first_date_tournament = datetime.strptime(tournament.list_date[0], "%d/%m/%Y")
-                    if first_date_tournament == current_date:
+
+                    if self.next_date(tournament):
                         self.choice_secondary_menu(tournament)
+                        tournament_items = False
                     else:
                         self.change_date(tournament)
                         self.choice_secondary_menu(tournament)
+                        tournament_items = False
                 else:
                     self.view.show_message("Please choose 1, 2 or 3")
 
     def get_all_player(self):
-        """
+        """ This function allows you to access the list of all players.
 
         :return:
         """
@@ -452,7 +520,7 @@ class Controller:
         self.display_players_list(self.list_players)
 
     def save_all(self):
-        """
+        """ This function allows to save the tournaments in the database.
 
         :return:
         """
