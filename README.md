@@ -29,6 +29,50 @@ Pour la procédure décrite ci-dessous vous devez disposer au minimum de la vers
 * Sur Windows, : env\Scripts\activate
 * Sur Unix et MacOS : source tutorial-env/bin/activate (Ce script est écrit pour le shell bash. Si vous utilisez csh ou fish, utilisez les variantes activate.csh ou activate.fish.)
 
+## Installation des paquets nécessaires :
+
+pip install -r requirements.txt
+
+# Exécution du programme
+Lancement :
+* Sur Windows: python chess_program.py
+* Sur Unix et MacOS : python3 python chess_program.py
+
+# Navigation :
+Une fois le programme lancé, l'utilisateur dispose de plusieurs menus : 
+## Menu principal
+1. création de nouveau tournoi : 
+Permet la création d’un nouveau tournoi, entrée les données relatives au tournoi et aux différents joueurs. L’utilisateur est ensuite redirigé vers le menu secondaire.
+2. afficher la liste des tournois :
+L’utilisateur est redirigé vers le menu des tournois enregistrés
+3. afficher la liste des joueurs :
+L’utilisateur est redirigé vers la liste des joueurs enregistrés, il peut ainsi afficher les joueurs par ordre alphabétique ou par classement.
+4. quitter le programme
+
+## Menu secondaire
+1. ajouter les résultats des matchs :
+L’utilisateur est redirigé vers la session de désignation du vainqueur de chaque match d’un round. Les points sont ensuite attribués selon le système établi (1 pour le vainqueur, 0.5 à chaque joueur en cas de match nul et 0 pour le perdant.
+2. mises à jour du classement :
+L’utilisateur est invité à sélectionner un joueur de liste des joueurs du tournoi, il peut ensuite mettre à jour le classement de celui-ci. 
+3. ajouter un commentaire
+4. sauvegarder :
+Enregistrement / mise à jour du tournoi dans la base de données
+5. aller au menu principal
+
+## Menu des tournois enregistrés
+1. afficher la liste des joueurs
+L’utilisateur est redirigé vers la liste des joueurs du tournoi, il peut ainsi afficher les joueurs par ordre alphabétique ou par classement.
+2. afficher la liste des rounds et des matchs
+3. quitter
+4. continuer le tournoi (si celui-ci n’est pas terminer)
+
+## Génération du rapport flake8_html
+Ouvrir un terminal et lancer la commande
+flake8 controllers models views chess_program.py --format=html --htmldir=flake-report
+
+
+
+
 
 
 
