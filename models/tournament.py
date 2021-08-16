@@ -81,7 +81,7 @@ class Tournament:
         self.number_of_round = 4
         self.list_rounds: List[Round] = []
         self.list_players: List[Player] = []
-        self.number_of_players = 4
+        self.number_of_players = 8
         self.time_control = pace
         self.description = comment
         self.list_date = []
