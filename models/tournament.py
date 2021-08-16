@@ -236,7 +236,7 @@ class Tournament:
         return other_round
 
     def serialize(self):
-        """This function allows to serialize a tournament
+        """This function allows to serialize a tournament.
 
         :return: dict
         """
@@ -254,7 +254,7 @@ class Tournament:
 
     @classmethod
     def deserialize(cls, serialize_tournament: dict):
-        """This function allows the deserialization of Tournament
+        """This function allows the deserialization of Tournament.
 
         :param serialize_tournament:
         :return: tournament object
