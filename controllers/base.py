@@ -1,10 +1,10 @@
 """ Class controller"""
 
-from tinydb import TinyDB, Query
-
+from datetime import datetime
 from operator import attrgetter
 from typing import List
-from datetime import datetime
+
+from tinydb import TinyDB, Query
 
 from models.tournament import Tournament
 from models.player import Player
