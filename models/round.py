@@ -56,11 +56,11 @@ class Round:
             self.end_date = kwargs["end_date"]
 
     def add_match(self, match):
-        """ Adds opponents to the list of matchs."""
+        """ Adds opponents to the list of match."""
         self.list_match.append(match)
 
     def add_match_score(self, match):
-        """ Add result of match to the list of matchs."""
+        """ Add result of match to the list of match."""
         self.list_match_score.append(match)
 
     def save_start_date(self):
